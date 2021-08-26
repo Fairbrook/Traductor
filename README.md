@@ -2,11 +2,26 @@
 
 ## Módulo 1 analizador léxico
 
-### Entrega 1: Analizador para identificadores y enteros
+### Entrega 2: Analizador léxico
 
-Entero definidio por la expresion regular [0-9]+
+Tipos admitidos
 
-Identificador definido por [a-Z]+[0-9a-Z]\*
+| Símbolo             | Descirpción                         |
+| ------------------- | ----------------------------------- |
+| Identificador       | letra(letra\|digito)\*              |
+| Entero              | digito+                             |
+| Real                | entero.entero                       |
+| Adicion             | + -                                 |
+| Multiplicacion      | \* /                                |
+| Asignacion          | =                                   |
+| Relacional          | < > <= >= != ==                     |
+| And                 | &&                                  |
+| Or                  | \|\|                                |
+| Not                 | !                                   |
+| Parentesis          | (,)                                 |
+| Llave               | {,}                                 |
+| Punto y coma        | ;                                   |
+| Palabras reservadas | if, while, return, else, int, float |
 
 Esta priemra entrega realiza el analizador léxico mediante una pseudo tabla de estados, se le llama seudo porque engloba los casos de múltiples caracteres en funciones como _isDigit_ y _isAlpha_ para determinar si un carcter es numérico o una letra
 
@@ -20,14 +35,16 @@ instalar el paquete [go-asilectron](https://github.com/asticode/go-astilectron) 
 
 ## Cómo utilizar el proyecto
 
-Escriba el texto de entrada en el _textarea_ y precione procesar, el resultado aparecerá en una tabla debajo
-![pantalla](https://i.ibb.co/6b9Sn9M/ndice.png)
+Escriba el texto de entrada en el area de la izquierda y espera a que aparezca el resultado en la parte derecha
+![pantalla](https://i.ibb.co/6RTWGNj/imagen.png)
 
 ## Tecnologías utilizadas
 
-| Tecnologia    | Utilizacion                                                                                                                                     |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| golang        | Funcionalidad principal (backend)                                                                                                               |
-| electron      | Desarrollo de aplicaciones nativas con ui desarrollado en html, css y js                                                                        |
-| asilectron    | Proporciona sockets TCP para la comunicación entre Electron y cualquier lenguaje de programación con el fin de escuchar los eventos de electron |
-| go-asilectron | Api de asilectron desarrollada para go                                                                                                          |
+| Tecnologia                                                  | Utilizacion                                                                                                                                     |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| [golang](https://golang.org/)                               | Funcionalidad principal (backend)                                                                                                               |
+| [electron](https://www.electronjs.org/)                     | Desarrollo de aplicaciones nativas con ui desarrollado en html, css y js                                                                        |
+| [asilectron](https://github.com/asticode/astilectron)       | Proporciona sockets TCP para la comunicación entre Electron y cualquier lenguaje de programación con el fin de escuchar los eventos de electron |
+| [go-asilectron](https://github.com/asticode/go-astilectron) | Api de asilectron desarrollada para go                                                                                                          |
+| [quill](https://quilljs.com/)                               | Como editor de texto para el texto de entrada                                                                                                   |
+| [AlpineJs](https://alpinejs.dev/)                           | Librería de JS para facilitar el comportamiento reactivo del UI                                                                                 |

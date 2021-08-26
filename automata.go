@@ -7,6 +7,15 @@ import (
 
 const noState uint8 = 255
 
+var simbols = map[byte]byte{
+	';': 1,
+	',': 2,
+	'(': 3,
+	')': 4,
+	'{': 5,
+	'}': 6,
+}
+
 func isAlpha(character byte) bool {
 	if character >= 'A' && character <= 'Z' {
 		return true
@@ -25,24 +34,50 @@ func isDigit(character byte) bool {
 }
 
 func isSpace(character byte) bool {
-	if character == ' ' || character == '\n' {
+	if character == ' ' || character == '\n' || character == '\t' {
+		return true
+	}
+	return false
+}
+
+func isValidString(character byte) bool {
+	if character == '\n' || character == '"' {
+		return false
+	}
+	return true
+}
+
+func isSimbol(character byte) bool {
+	if _, ok := simbols[character]; ok {
 		return true
 	}
 	return false
 }
 
 var functions = map[string]func(byte) bool{
-	"isAlpha": isAlpha,
-	"isDigit": isDigit,
+	"isAlpha":       isAlpha,
+	"isDigit":       isDigit,
+	"isValidString": isValidString,
+	"isSimbol":      isSimbol,
 }
 
 var states = map[uint8]map[string]uint8{
 	0: {
-		"isAlpha": 1,
-		"isDigit": 2,
-		"$":       3,
-		// "isSimbol": 4,
-		// "\"": 5,
+		"isAlpha":  1,
+		"isDigit":  2,
+		"$":        3,
+		"+":        4,
+		"-":        4,
+		"*":        5,
+		"/":        5,
+		"<":        6,
+		">":        6,
+		"|":        7,
+		"&":        8,
+		"!":        9,
+		"=":        10,
+		"isSimbol": 11,
+		"\"":       12,
 	},
 	1: {
 		"isAlpha": 1,
@@ -50,29 +85,63 @@ var states = map[uint8]map[string]uint8{
 	},
 	2: {
 		"isDigit": 2,
-		// ".":       3,
+		".":       13,
 	},
-	// 3: {
-	// 	"isDigit": 3,
-	// },
-	// 4: {
-	// 	"+": 6,
-	// 	"-": 6,
-	// 	"*": 7,
-	// 	"/": 7,
-	// 	"<": 8,
-	// 	">": 8,
-	// 	"=": 9,
-	// 	"!": 10,
-	// 	"|": 11,
-	// 	"&": 12,
-	// },
+	3: {},
+	4: {},
+	5: {},
+	6: {
+		"=": 14,
+	},
+	7: {
+		"|": 15,
+	},
+	8: {
+		"&": 16,
+	},
+	9: {
+		"=": 17,
+	},
+	10: {
+		"=": 17,
+	},
+	11: {},
+	12: {
+		"isValidString": 12,
+		"\"":            18,
+	},
+	13: {
+		"isDigit": 19,
+	},
+	14: {},
+	15: {},
+	16: {},
+	17: {},
+	18: {},
+	19: {
+		"isDigit": 19,
+	},
 }
 
 var terminals = map[uint8]string{
-	1: "identificador",
-	2: "entero",
+	1: "Identificador",
+	2: "Entero",
 	3: "$",
+	4: "OpSuma",
+	5: "OpMul",
+
+	6:  "OpRelac",
+	14: "OpRelac",
+
+	9:  "OpNot",
+	10: "=",
+	11: "Simbolo",
+	15: "OpOr",
+	16: "OpAnd",
+	17: "OpIgualdad",
+
+	18: "Cadena",
+	19: "Decimal",
 }
 
 type Segment struct {
@@ -103,8 +172,10 @@ func evaluate(str string) (segment Segment, err error) {
 					nextState = element
 					break
 				}
+				continue
 			}
-			if key[0] == str[index] {
+
+			if key[0] == str[index] && len(key) == 1 {
 				nextState = element
 				break
 			}
@@ -116,7 +187,7 @@ func evaluate(str string) (segment Segment, err error) {
 				segment.StateName = name
 				return
 			}
-			err = errors.New(fmt.Sprintf("Caracter inesperado %c", str[index]))
+			err = errors.New(fmt.Sprintf("Caracter inesperado '%c'", str[index]))
 			return
 		}
 		segment.State = nextState

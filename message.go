@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/Fairbrook/analizador/Sintactico"
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
 )
@@ -20,7 +21,7 @@ func handleMessages(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			}
 		}
 		fmt.Printf(str)
-		if payload, err = processString(str); err != nil {
+		if payload, err = Sintactico.ProcessString(str); err != nil {
 			payload = err.Error()
 			return
 		}

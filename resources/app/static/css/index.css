@@ -46,7 +46,7 @@ textarea {
 #res {
   background-color: rgb(80, 80, 80);
   border-left: 1px solid white;
-  width: 30rem;
+  width: 40rem;
   padding: 1rem;
   overflow-y: auto;
   overflow-x: hidden;

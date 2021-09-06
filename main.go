@@ -1,6 +1,6 @@
 package main
 
-// import "fmt"
+//import "fmt"
 
 import (
 	"flag"
@@ -72,12 +72,7 @@ func main() {
 		}},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
 			// w = ws[0]
-			// go func() {
-			// 	time.Sleep(5 * time.Second)
-			// 	if err := bootstrap.SendMessage(w, "check.out.menu", "Don't forget to check out the menu!"); err != nil {
-			// 		l.Println(fmt.Errorf("sending check.out.menu event failed: %w", err))
-			// 	}
-			// }()
+			// w.OpenDevTools()
 			return nil
 		},
 		RestoreAssets: RestoreAssets,
@@ -87,12 +82,13 @@ func main() {
 			Options: &astilectron.WindowOptions{
 				BackgroundColor: astikit.StrPtr("#E5E5E5"),
 				Center:          astikit.BoolPtr(true),
-				Height:          astikit.IntPtr(700),
-				Width:           astikit.IntPtr(700),
+				Height:          astikit.IntPtr(800),
+				Width:           astikit.IntPtr(1500),
 			},
 		}},
 	}); err != nil {
 		l.Fatal(fmt.Errorf("running boostrap failed: %w", err))
 	}
 
+	// processString("int")
 }

@@ -46,7 +46,7 @@ textarea {
 #res {
   background-color: rgb(80, 80, 80);
   border-left: 1px solid white;
-  width: 40rem;
+  width: 30rem;
   padding: 1rem;
   overflow-y: auto;
   overflow-x: hidden;
@@ -61,7 +61,7 @@ textarea {
 
 .row {
   border-bottom: 1px solid rgb(143, 143, 143);
-  grid-template-columns: repeat(2, 2fr) 1fr;
+  grid-template-columns: 2fr 2fr 1fr;
   display: grid;
 }
 
@@ -81,6 +81,6 @@ textarea {
   font-weight: 700;
 }
 
-.error {
-  color: rgb(230, 115, 115);
+.error{
+    color: rgb(230, 115, 115);
 }

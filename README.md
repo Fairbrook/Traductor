@@ -57,7 +57,7 @@ Si bien la salida de este módulo es un símple válido o inválido, se decidió
 
 ## Cómo correr el proyecto
 
-Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](https://github.com/Fairbrook/Traductor/releases/tag/0.1) que se encuentra en los release del repositorio, si está en otro sistema operativo o no funciona el ejecutable deberá compilarlo para la plataforma
+Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](hhttps://github.com/Fairbrook/Traductor/releases/tag/v0.1-alpha.2) que se encuentra en los release del repositorio, si está en otro sistema operativo o no funciona el ejecutable deberá compilarlo para la plataforma
 Requerira un entorno de [golang](https://golang.org/)
 instalar el paquete [go-asilectron](https://github.com/asticode/go-astilectron) y su respectivo [bundler](https://github.com/asticode/go-astilectron-bundler)
 

@@ -20,10 +20,10 @@ var states = map[int]map[int]int{
 	4: {23: -2},
 }
 
-var rules = map[int][2]int{
-	-1: {accept, accept},
-	-2: {E, 3},
-	-3: {E, 1},
+var rules = map[int][3]int{
+	-1: {accept, accept, ' '},
+	-2: {E, 3, 'E'},
+	-3: {E, 1, 'E'},
 }
 
 type Step struct {
@@ -36,20 +36,33 @@ func ProcessString(str string) (res []Step, err error) {
 	var pila Utils.Stack
 	var segment Lexico.Segment
 	analizadorLexico := Lexico.Lexico{Input: str + "$"}
-	pila.Push("0")
+	node := Utils.Node{
+		Segment: Utils.Segment{
+			Lexema: "$",
+		},
+		State: 0,
+	}
+	pila.Push(Utils.Tree{Root: node})
 	for !pila.IsEmpty() {
 		step := Step{Stack: pila.ToStr(), Input: analizadorLexico.GetLast()}
 		segment, err = analizadorLexico.NextSegment()
 		if err != nil {
 			return
 		}
-		top, _ := strconv.Atoi(pila.Top)
+		top := pila.Top.Root.State
 		if next, ok := states[top][int(segment.State)]; ok {
 			if next >= 0 {
 				strState := strconv.FormatInt(int64(next), 10)
 				step.Output = "d" + strState
-				pila.Push(segment.Lexema)
-				pila.Push(strState)
+				node = Utils.Node{
+					Segment: Utils.Segment{
+						Lexema: segment.Lexema,
+						Index:  segment.Index,
+						Type:   int(segment.State),
+					},
+					State: next,
+				}
+				pila.Push(Utils.Tree{Root: node})
 				res = append(res, step)
 				continue
 			}
@@ -63,15 +76,24 @@ func ProcessString(str string) (res []Step, err error) {
 				return
 			}
 
+			node = Utils.Node{
+				Segment: Utils.Segment{
+					Lexema: string(byte(rule[2])),
+					Type:   rule[1],
+				},
+			}
+			tree := Utils.Tree{}
+
 			step.Output = "r" + strconv.FormatInt(int64(next*-1), 10)
-			for i := 0; i < rule[1]*2; i++ {
-				pila.Pop()
+			for i := 0; i < rule[1]; i++ {
+				tree.AddChild(pila.Pop())
 			}
 
-			top, _ = strconv.Atoi(pila.Top)
+			top = pila.Top.Root.State
 			action := states[top][rule[0]]
-			pila.Push(strconv.FormatInt(int64(rule[0]), 10))
-			pila.Push(strconv.FormatInt(int64(action), 10))
+			node.State = action
+			tree.Root = node
+			pila.Push(tree)
 			res = append(res, step)
 			continue
 		}

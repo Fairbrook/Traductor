@@ -1,29 +1,31 @@
 package Utils
 
+import "strconv"
+
 type Stack struct {
-	Top     string
-	content []string
+	Top     Tree
+	content []Tree
 	index   int
 }
 
-func (q *Stack) Push(str string) {
-	q.Top = str
+func (q *Stack) Push(tree Tree) {
+	q.Top = tree
 	if q.content == nil {
-		q.content = make([]string, 10)
+		q.content = make([]Tree, 10)
 		q.index = -1
 	}
 	q.index++
 	if len(q.content) <= q.index {
-		temp := make([]string, q.index+10)
+		temp := make([]Tree, q.index+10)
 		copy(temp, q.content)
 		q.content = temp
 	}
-	q.content[q.index] = str
+	q.content[q.index] = tree
 }
 
-func (q *Stack) Pop() string {
+func (q *Stack) Pop() Tree {
 	if q.content == nil || q.index < 0 {
-		return ""
+		return Tree{}
 	}
 	q.index--
 	if len(q.content)-q.index > 10 {
@@ -36,9 +38,9 @@ func (q *Stack) Pop() string {
 func (q *Stack) ToStr() string {
 	str := ""
 	for i := 0; i <= q.index; i++ {
-		str += q.content[i]
+		str += q.content[i].Root.Segment.Lexema + " " + strconv.FormatInt(int64(q.content[i].Root.State), 10)
 		if i < q.index {
-			str += " "
+			str += "\t"
 		}
 	}
 	return str

@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	// "time"
+	"github.com/Fairbrook/analizador/Sintactico"
 	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
@@ -90,5 +90,8 @@ func main() {
 		l.Fatal(fmt.Errorf("running boostrap failed: %w", err))
 	}
 
-	// processString("int")
+}
+
+func main2() {
+	Sintactico.ProcessString("int main(){}")
 }

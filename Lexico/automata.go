@@ -106,6 +106,10 @@ func evaluate(str string) (segment Segment, err error) {
 	start := 0
 	err = nil
 
+	for isSpace(str[start]) {
+		start++
+	}
+
 	var nextState uint8
 	for index := start; len(str) > index; index++ {
 		nextState = noState

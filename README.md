@@ -1,6 +1,6 @@
 # Proyecto de la clase de Seminario de traductores de lenjuage
 
-## Módulo 1 analizador léxico
+## Analizador léxico
 
 Tipos admitidos
 
@@ -25,7 +25,7 @@ Esta priemra entrega realiza el analizador léxico mediante una pseudo tabla de 
 
 Esta tabla de estados es utilizada por un autómata que analiza la cadena de entrada hasta llegar a un caracter para el cual no se tiene un estado siguiente, una vez detenido regresa al estado 0 y reinicia el proceso
 
-## Entrega 2 | Módulo 2 - Analizador Sintáctico
+## Analizador Sintáctico
 
 El analizador sintáctico permite identificar secuencia de lexemas válidos para el lenguaje determinado
 Por lo general se dfine con una serie de reglas que permiten a un autómata, a partir de la salida de Analizador Léxico verificar la secuencia de los tokens
@@ -57,16 +57,19 @@ Si bien la salida de este módulo es un símple válido o inválido, se decidió
 
 Para la segunda entrega, la pila está compuesta por objetos en vez de cadenas, estos objetos son árboles y cuando se realiza una reducción, se guarda en el árbol correspondiente resultante los segmentos usados para su construcción
 
+## Modulo 4 - Gramática del compilador
+En esta entrega se hace uso de una serie de reglas extendidas para el compilador, lo cual permite identificar cada segmento del programa gracias al analizador sintáctico que identifica cada regla
+
 ## Cómo correr el proyecto
 
-Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](https://github.com/Fairbrook/Traductor/releases/tag/v0.1-alpha.3) que se encuentra en los release del repositorio, si está en otro sistema operativo o no funciona el ejecutable deberá compilarlo para la plataforma
+Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](https://github.com/Fairbrook/Traductor/releases/tag/v0.1-alpha.4) que se encuentra en los release del repositorio, si está en otro sistema operativo o no funciona el ejecutable deberá compilarlo para la plataforma
 Requerira un entorno de [golang](https://golang.org/)
 instalar el paquete [go-asilectron](https://github.com/asticode/go-astilectron) y su respectivo [bundler](https://github.com/asticode/go-astilectron-bundler)
 
 ## Cómo utilizar el proyecto
 
 Escriba el texto de entrada en el area de la izquierda y espera a que aparezca el resultado en la parte derecha
-![pantalla](https://i.ibb.co/4pM2cHV/Screenshot-3.png)
+![pantalla](https://i.ibb.co/Hnm6HCc/Screenshot-4.png)
 
 ## Tecnologías utilizadas
 

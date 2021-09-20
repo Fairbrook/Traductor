@@ -31,7 +31,9 @@ func (q *Stack) Pop() Tree {
 	if len(q.content)-q.index > 10 {
 		q.content = q.content[0 : q.index+10]
 	}
-	q.Top = q.content[q.index]
+	if q.index >= 0 {
+		q.Top = q.content[q.index]
+	}
 	return q.content[q.index+1]
 }
 

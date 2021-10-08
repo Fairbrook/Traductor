@@ -1,31 +1,32 @@
 package Utils
 
 type Tree struct {
-	Root     Node
-	children []Tree
+	Root     Node   `json:"Root"`
+	Children []Tree `json:"Children"`
 	index    int
 }
 
 func (t *Tree) AddChild(tree Tree) {
-	if t.children == nil {
-		t.children = make([]Tree, 10)
+	if t.Children == nil {
+		t.Children = make([]Tree, 10)
 	}
-	if len(t.children) <= t.index {
+	if len(t.Children) <= t.index {
 		temp := make([]Tree, t.index+10)
-		copy(temp, t.children)
-		t.children = temp
+		copy(temp, t.Children)
+		t.Children = temp
 	}
-	t.children[t.index] = tree
+	t.Children[t.index] = tree
+	t.index++
 }
 
 func (t *Tree) RemoveChild(pos int) {
-	if len(t.children) <= pos || pos < 0 {
+	if len(t.Children) <= pos || pos < 0 {
 		return
 	}
-	t.children[pos] = t.children[len(t.children)-1]
+	t.Children[pos] = t.Children[len(t.Children)-1]
 	t.index--
 }
 
 func (t *Tree) GetChildren() []Tree {
-	return t.children[0:t.index]
+	return t.Children[0:t.index]
 }

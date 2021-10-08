@@ -64,7 +64,7 @@ func initialNode() Utils.Node {
 	}
 }
 
-func ProcessString(str string) (res []Step, err error) {
+func ProcessString(str string) (tree Utils.Tree, res []Step, err error) {
 	var pila Utils.Stack
 	var segment Lexico.Segment
 	analizadorLexico := Lexico.Lexico{Input: str + "$"}
@@ -101,7 +101,7 @@ func ProcessString(str string) (res []Step, err error) {
 				return
 			}
 
-			tree := reduce(rule, next, &step, &pila)
+			tree = reduce(rule, next, &step, &pila)
 			pila.Push(tree)
 			res = append(res, step)
 			continue

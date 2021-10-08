@@ -81,6 +81,25 @@ textarea {
   font-weight: 700;
 }
 
-.error{
-    color: rgb(230, 115, 115);
+.error {
+  color: rgb(230, 115, 115);
+}
+
+.tree > .child {
+  margin-left: 1rem;
+}
+.tree > .file::before {
+  content: "🗎";
+}
+.tree > .folder {
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: capitalize;
+  cursor: pointer; 
+}
+.tree > .folder.close::before {
+  content: "🗀";
+}
+.tree > .folder.open::before {
+  content: "🗁";
 }

@@ -60,16 +60,40 @@ Para la segunda entrega, la pila está compuesta por objetos en vez de cadenas, 
 ## Modulo 4 - Gramática del compilador
 En esta entrega se hace uso de una serie de reglas extendidas para el compilador, lo cual permite identificar cada segmento del programa gracias al analizador sintáctico que identifica cada regla
 
+## Modulo 5 - Árbol sintáctico
+La creación de un árbol sintáctico consiste en almacenar los componentes de cada reducción en un árbol permitiendo la posterior creación de una tabla de símbolos
+
+Para que quede más claro se utilizó el sigueinte código de ejemplo
+```
+int a;
+int suma(int a, int b){
+    return a+b;
+}
+
+int main(){
+    float a;
+    int b;
+    int c;
+    c = a+b;
+    c = suma(8,9);
+}
+```
+
+## Haz click [aquí](https://laughing-ardinghelli-16d744.netlify.app/) para ver el árbol de forma interactiva
+
+El cual da como resultado el siguiente árbol sintáctico
+![arbol](https://i.ibb.co/fS4nHHT/Screenshot-2021-10-08-at-13-39-49-Screenshot.png)
+
 ## Cómo correr el proyecto
 
-Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](https://github.com/Fairbrook/Traductor/releases/tag/v0.1-alpha.4) que se encuentra en los release del repositorio, si está en otro sistema operativo o no funciona el ejecutable deberá compilarlo para la plataforma
+Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](https://github.com/Fairbrook/Traductor/releases/tag/v0.1-alpha.5) que se encuentra en los release del repositorio, si está en otro sistema operativo o no funciona el ejecutable deberá compilarlo para la plataforma
 Requerira un entorno de [golang](https://golang.org/)
 instalar el paquete [go-asilectron](https://github.com/asticode/go-astilectron) y su respectivo [bundler](https://github.com/asticode/go-astilectron-bundler)
 
 ## Cómo utilizar el proyecto
 
 Escriba el texto de entrada en el area de la izquierda y espera a que aparezca el resultado en la parte derecha
-![pantalla](https://i.ibb.co/Hnm6HCc/Screenshot-4.png)
+![pantalla](https://i.ibb.co/rpdG5R4/Screenshot-5.png)
 
 ## Tecnologías utilizadas
 

@@ -34,7 +34,9 @@ function formatText(delta, oldDelta) {
       text =
         pointer <= 0 || pointer + op.delete >= text.length
           ? ""
-          : `${text.substring(0, pointer)}${text.substring(pointer + op.delete)}`;
+          : `${text.substring(0, pointer)}${text.substring(
+              pointer + op.delete
+            )}`;
   });
   return text;
 }
@@ -47,7 +49,8 @@ function sendChange(text) {
 
   const message = { name: "process", payload: text };
   astilectron.sendMessage(message, function (message) {
-    if (!Array.isArray(message.payload)) {
+    console.log(message.payload);
+    if (typeof message.payload === "string") {
       globals.resultNode.dispatchEvent(
         new CustomEvent("error", { detail: message.payload })
       );
@@ -70,6 +73,25 @@ function configureQuill() {
     if (source != "user" || !globals.isAstilectronReady) return;
     debaunce(() => sendChange(formatText(delta, oldDelta)));
   });
+}
+
+function renderTree(tree, index = "1") {
+  if (!tree) return "";
+  let res = `<div class="tree" x-data={show_${index}:false} ><span :class="show_${index}?'open':'close'"  @click="show_${index}=!show_${index}" class="${
+    tree.Children ? "folder" : "file"
+  }">${tree.Root.Segment.Lexema}</span >`;
+  if (tree.Children) {
+    for (let j = 0; j < tree.Children.length; j++) {
+      const child = tree.Children[j];
+      if (!child.Root.Segment.Lexema) break;
+      res += `<div class="child" x-show="show_${index}">${renderTree(
+        child,
+        `${index}_${j + 1}`
+      )}</div>`;
+    }
+  }
+  res += "</div>";
+  return res;
 }
 
 function defineData() {

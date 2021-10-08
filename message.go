@@ -21,7 +21,7 @@ func handleMessages(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			}
 		}
 		fmt.Printf(str)
-		if payload, err = Sintactico.ProcessString(str); err != nil {
+		if payload, _, err = Sintactico.ProcessString(str); err != nil {
 			payload = err.Error()
 			return
 		}

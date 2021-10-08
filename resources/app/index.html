@@ -3,7 +3,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Parte 1 | Analizador léxico</title>
+    <title>Parte 3 | Arbol sintáctico</title>
 
     <link rel="stylesheet" href="static/lib/quill/quill.snow.css" />
     <link rel="stylesheet" href="static/css/index.css" />
@@ -18,20 +18,9 @@
         <h4 x-show="proc" x-text="proc"></h4>
         <h4 x-show="error" x-text="error" class="error"></h4>
         <div x-show="res && !proc">
-          <div class="row">
-            <div class="header">Pila</div>
-            <div class="header">Entrada</div>
-            <div class="header">Salida</div>
-          </div>
-
-          <template x-for="segment in segments">
-            <div class="row">
-              <div x-text="segment.stack"></div>
-              <div x-text="segment.input"></div>
-              <div x-text="segment.output"></div>
-            </div>
-          </template>
+          <div x-html="renderTree(segments)"></div>
         </div>
+      
       </div>
     </div>
 

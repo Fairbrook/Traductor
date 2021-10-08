@@ -67,7 +67,7 @@ func isDigit(character byte) bool {
 }
 
 func isSpace(character byte) bool {
-	if character == ' ' || character == '\n' || character == '\t' {
+	if character == ' ' || character == '\n' || character == '\t' || character == '\r' {
 		return true
 	}
 	return false

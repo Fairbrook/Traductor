@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Fairbrook/analizador/Sintactico"
+	"github.com/Fairbrook/analizador/Semantico"
 	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
@@ -27,7 +27,7 @@ var (
 	w     *astilectron.Window
 )
 
-func main() {
+func main2() {
 	l := log.New(log.Writer(), log.Prefix(), log.Flags())
 
 	fs.Parse(os.Args[1:])
@@ -92,6 +92,6 @@ func main() {
 
 }
 
-func main2() {
-	Sintactico.ProcessString("int main(){}")
+func main() {
+	Semantico.ProcessString("int main(float a,int c){ if(a==b){ a=a+b; }else{ } int a,b; c = a+b; c=+a; c=hola(); hola(); return a; } int test(){}")
 }

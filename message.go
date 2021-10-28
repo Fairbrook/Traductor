@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/Fairbrook/analizador/Sintactico"
+	"github.com/Fairbrook/analizador/Semantico"
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
 )
@@ -21,28 +21,12 @@ func handleMessages(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 			}
 		}
 		fmt.Printf(str)
-		if payload, _, err = Sintactico.ProcessString(str); err != nil {
-			payload = err.Error()
+		var errors []error
+		if payload, errors = Semantico.ProcessString(str); len(errors) > 0 {
+			payload = errors[0].Error()
+			err = errors[0]
 			return
 		}
 	}
-	// switch m.Name {
-	// case "explore":
-	// 	// Unmarshal payload
-	// 	var path string
-	// 	if len(m.Payload) > 0 {
-	// 		// Unmarshal payload
-	// 		if err = json.Unmarshal(m.Payload, &path); err != nil {
-	// 			payload = err.Error()
-	// 			return
-	// 		}
-	// 	}
-
-	// 	// Explore
-	// 	if payload, err = explore(path); err != nil {
-	// 		payload = err.Error()
-	// 		return
-	// 	}
-	// }
 	return
 }

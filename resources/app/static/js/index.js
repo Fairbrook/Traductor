@@ -49,7 +49,7 @@ function sendChange(text) {
 
   const message = { name: "process", payload: text };
   astilectron.sendMessage(message, function (message) {
-    console.log(message.payload);
+    console.log(message);
     if (typeof message.payload === "string") {
       globals.resultNode.dispatchEvent(
         new CustomEvent("error", { detail: message.payload })

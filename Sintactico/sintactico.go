@@ -3,7 +3,6 @@ package Sintactico
 import (
 	"errors"
 	"fmt"
-	"strconv"
 
 	Lexico "github.com/Fairbrook/analizador/Lexico"
 	Utils "github.com/Fairbrook/analizador/Utils"
@@ -34,7 +33,7 @@ func segmentToNode(segment Lexico.Segment, state int) Utils.Node {
 	}
 }
 
-func reduce(rule Rule, next int, step *Step, pila *Utils.Stack) Utils.Tree {
+func reduce(rule Rule, next int, pila *Utils.Stack) Utils.Tree {
 	node := Utils.Node{
 		Segment: Utils.Segment{
 			Lexema: rule.terminal,
@@ -42,13 +41,11 @@ func reduce(rule Rule, next int, step *Step, pila *Utils.Stack) Utils.Tree {
 		},
 	}
 	tree := Utils.Tree{}
-
-	step.Output = "r" + strconv.FormatInt(int64(next*-1), 10)
 	for i := 0; i < rule.popNumber; i++ {
-		tree.AddChild(pila.Pop())
+		tree.AddChild(pila.Pop().(Utils.Tree))
 	}
 
-	top := pila.Top.Root.State
+	top := pila.Top.(Utils.Tree).Root.(Utils.Node).State
 	action := States[top][rule.lexema]
 	node.State = action
 	tree.Root = node
@@ -64,19 +61,18 @@ func initialNode() Utils.Node {
 	}
 }
 
-func ProcessString(str string) (tree Utils.Tree, res []Step, err error) {
+func GenerateSyntacticTree(str string) (tree Utils.Tree, err error) {
 	var pila Utils.Stack
 	var segment Lexico.Segment
 	analizadorLexico := Lexico.Lexico{Input: str + "$"}
 	node := initialNode()
 	pila.Push(Utils.Tree{Root: node})
 	for !pila.IsEmpty() {
-		step := Step{Stack: pila.ToStr(), Input: analizadorLexico.GetLast()}
 		segment, err = analizadorLexico.NextSegment()
 		if err != nil {
 			return
 		}
-		top := pila.Top.Root.State
+		top := pila.Top.(Utils.Tree).Root.(Utils.Node).State
 		if next, ok := States[top][int(segment.State)]; ok {
 			if next == 0 {
 				err = errors.New(fmt.Sprintf("Cadena inesperada %s", segment.Lexema))
@@ -84,11 +80,8 @@ func ProcessString(str string) (tree Utils.Tree, res []Step, err error) {
 			}
 
 			if next >= 0 {
-				strState := strconv.FormatInt(int64(next), 10)
-				step.Output = "d" + strState
 				node = segmentToNode(segment, next)
 				pila.Push(Utils.Tree{Root: node})
-				res = append(res, step)
 				continue
 			}
 
@@ -96,14 +89,11 @@ func ProcessString(str string) (tree Utils.Tree, res []Step, err error) {
 			rule := Rules[next]
 
 			if rule.lexema == accept {
-				step.Output = "Aceptación"
-				res = append(res, step)
 				return
 			}
 
-			tree = reduce(rule, next, &step, &pila)
+			tree = reduce(rule, next, &pila)
 			pila.Push(tree)
-			res = append(res, step)
 			continue
 		}
 		err = errors.New(fmt.Sprintf("Cadena inesperada %s", segment.Lexema))

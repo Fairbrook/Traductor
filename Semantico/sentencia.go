@@ -78,16 +78,22 @@ func procExpresion(tree *Utils.Tree, table *Table) ([]error, string) {
 func getArgs(tree *Utils.Tree, table *Table) ([]error, []string) {
 	errors := make([]error, 0)
 	values := make([]string, 0)
-	if tree.Children == nil {
+	if tree == nil || tree.Children == nil {
 		return errors, values
 	}
-	err, retArray := getArgs(tree.Children, table)
-	errors = append(errors, err...)
-	values = append(values, retArray...)
+	iterator := tree.Children
+	if iterator.Root.(Utils.Node).Segment.Lexema == "," {
+		iterator = iterator.Next
+	}
 	var retType string
-	err, retType = procExpresion(tree.Children.Next, table)
+	var err []error
+	err, retType = procExpresion(iterator, table)
 	errors = append(errors, err...)
 	values = append(values, retType)
+
+	err, retArray := getArgs(iterator.Next, table)
+	errors = append(errors, err...)
+	values = append(values, retArray...)
 	return errors, values
 }
 
@@ -104,7 +110,16 @@ func procCall(tree *Utils.Tree, table *Table) ([]error, string) {
 	err, arguments := getArgs(arguPointer, table)
 	i := 0
 	errors = append(errors, err...)
+	if len(arguments) < len(fun.Parameters) {
+		errors = append(errors, fmt.Errorf("muy pocos argumentos para llamar a la función %s", fun.Identifier))
+		return errors, fun.ReturnType
+	}
+	if len(arguments) > len(fun.Parameters) {
+		errors = append(errors, fmt.Errorf("muchos argumentos para llamar a la función %s", fun.Identifier))
+		return errors, fun.ReturnType
+	}
 	for _, param := range fun.Parameters {
+
 		if param.Type != arguments[i] {
 			errors = append(errors, fmt.Errorf("la llamada a la funcion %s no recuerda co la declaracion", fun.Identifier))
 			break
@@ -201,7 +216,7 @@ func procSentencia(tree *Utils.Tree, table *Table, function Function) []error {
 		}
 	case "return":
 		{
-			err, retType := procExpresion(iterator.Next.Next, table)
+			err, retType := procExpresion(iterator.Next.Children, table)
 			errors = append(errors, err...)
 			if retType != function.ReturnType {
 				errors = append(errors, fmt.Errorf("el valor de retorno no corresponde con el valor definido de la funcion %s", function.getIdentifier()))
@@ -214,7 +229,7 @@ func procSentencia(tree *Utils.Tree, table *Table, function Function) []error {
 			err, retType := procExpresion(iterator.Next.Next, table)
 			errors = append(errors, err...)
 			if variable == nil {
-				errors = append(errors, fmt.Errorf("la variable %s no esta definida", variable))
+				errors = append(errors, fmt.Errorf("la variable %s no esta definida", lexema))
 				return errors
 			}
 			if retType != "" && variable.(*Variable).Type != retType {

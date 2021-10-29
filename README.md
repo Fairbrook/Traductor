@@ -84,16 +84,41 @@ int main(){
 El cual da como resultado el siguiente árbol sintáctico
 ![arbol](https://i.ibb.co/fS4nHHT/Screenshot-2021-10-08-at-13-39-49-Screenshot.png)
 
+## Modulo 6 - Tabla de símbolos
+Mediante el árbol obtenido del analizador sintáctico, podemos generar una tabla de símbolos, esta tabla permit realizar las validaciones necesarias para el contexto en cada parte del programa. Por ejemplo, si tenemos el siguiente código
+```
+int suma(int a, int b){
+     a+b;
+}
+
+int main(){
+    int a, b;
+    a = 3;
+    b = 10;
+    int c;
+    c = suma(a,b);
+}
+```
+generará esta tabla de símbolos:
+![tabla](https://i.ibb.co/n8ztCnT/Screenshot-2.png)
+
+Este análisis se logra mediante el corrido del arbol sintáctico y la utilizacion de estructuras "map" o diccionarios
+
+Cada vez que se encuentra una deficion en el programa se añade un registro a la tabla de símbolos, indicando si es una función, una variable y su tipo de datos. En caso de ser una función se guardan los parámetros que require.
+
+Otra observación es que se están utilizando anidación de tablas, lo que significa que cuando el programa entra en un bloque nuevo (funcion) genera una subtabla que se vincula al regitro de la funcion en la tabla principal
+
+Cuando el programa encuentra una expresión detecta que tipo es y en caso de ser un identificador utiliza la tabla del contexto actual para encontrar la defición original. En caso de no existir se envía el error correspondiente
 ## Cómo correr el proyecto
 
-Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](https://github.com/Fairbrook/Traductor/releases/tag/v0.1-alpha.5) que se encuentra en los release del repositorio, si está en otro sistema operativo o no funciona el ejecutable deberá compilarlo para la plataforma
+Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](https://github.com/Fairbrook/Traductor/releases/tag/v0.1-alpha.6) que se encuentra en los release del repositorio, si está en otro sistema operativo o no funciona el ejecutable deberá compilarlo para la plataforma
 Requerira un entorno de [golang](https://golang.org/)
 instalar el paquete [go-asilectron](https://github.com/asticode/go-astilectron) y su respectivo [bundler](https://github.com/asticode/go-astilectron-bundler)
 
 ## Cómo utilizar el proyecto
 
 Escriba el texto de entrada en el area de la izquierda y espera a que aparezca el resultado en la parte derecha
-![pantalla](https://i.ibb.co/rpdG5R4/Screenshot-5.png)
+![pantalla](https://i.ibb.co/PZCm5vw/Screenshot-1.png)
 
 ## Tecnologías utilizadas
 

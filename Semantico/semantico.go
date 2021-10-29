@@ -31,12 +31,12 @@ func def(tree *Utils.Tree, table *Table) []error {
 	}
 }
 
-func ProcessString(str string) (table Table, errs []error) {
+func Analize(str string) (table Table, errs []error) {
 	var err error
 	var tree Utils.Tree
 	table = Table{}
 	if tree, err = Sintactico.GenerateSyntacticTree(str); err != nil {
-		errs = append(errs, err)
+		errs = []error{err}
 		return
 	}
 	if tree.Children == nil {

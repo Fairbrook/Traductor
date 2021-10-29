@@ -16,9 +16,25 @@
           Escribe algo a la izquierda para ver el resultado . . .
         </h4>
         <h4 x-show="proc" x-text="proc"></h4>
-        <h4 x-show="error" x-text="error" class="error"></h4>
+        <div x-show="error">
+          <template x-for="e in error">
+            <h4 x-text="e" class="error"></h4>
+          </template>
+        </div>
         <div x-show="res && !proc">
-          <div x-html="renderTree(segments)"></div>
+          <div class="row">
+            <div class="header">Simbolo</div>
+            <div class="header">Tipo de simbolo</div>
+            <div class="header">Tipo de dato</div>
+          </div>
+
+          <template x-for="segment in segments">
+            <div class="row">
+              <div x-text="segment[0]"></div>
+              <div x-text="segment[1]"></div>
+              <div x-text="segment[2]"></div>
+            </div>
+          </template>
         </div>
       
       </div>

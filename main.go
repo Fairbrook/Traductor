@@ -27,7 +27,7 @@ var (
 	w     *astilectron.Window
 )
 
-func main2() {
+func main() {
 	l := log.New(log.Writer(), log.Prefix(), log.Flags())
 
 	fs.Parse(os.Args[1:])
@@ -92,6 +92,7 @@ func main2() {
 
 }
 
-func main() {
-	Semantico.ProcessString("int main(float a,int c){ if(a==b){ a=a+b; }else{ } int a,b; c = a+b; c=+a; c=hola(); hola(); return a; } int test(){}")
+func main2() {
+	table, _ := Semantico.Analize("int suma(int a, int b){return a+b;}")
+	table.ToArray()
 }

@@ -59,3 +59,24 @@ func (t *Table) dumpStack() Utils.Stack {
 	}
 	return copy
 }
+
+func (t *Table) ToArray() [][3]string {
+	return t.toArrayInter("")
+}
+
+func (t *Table) toArrayInter(parent string) [][3]string {
+	prepend := ""
+	res := [][3]string{}
+	if parent != "" {
+		prepend = parent + " ➔ "
+	}
+	for key, te := range t.ts {
+		temp := te.symbol.ToArray()
+		temp[0] = prepend + temp[0]
+		res = append(res, temp)
+		if te.table != nil {
+			res = append(res, te.table.toArrayInter(prepend+key)...)
+		}
+	}
+	return res
+}

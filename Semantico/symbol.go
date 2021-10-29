@@ -12,6 +12,7 @@ type Symbol interface {
 	getType() string
 	getIdentifier() string
 	setScope(string)
+	ToArray() [3]string
 }
 
 type Variable struct {
@@ -28,6 +29,13 @@ func (v *Variable) getIdentifier() string {
 func (v *Variable) setScope(scope string) {
 	v.Scope = scope
 }
+func (v *Variable) ToArray() [3]string {
+	return [3]string{
+		v.Identifier,
+		VariableType,
+		v.Type,
+	}
+}
 
 type Function struct {
 	ReturnType string
@@ -43,4 +51,11 @@ func (f *Function) getIdentifier() string {
 }
 func (f *Function) setScope(scope string) {
 	f.Scope = scope
+}
+func (f *Function) ToArray() [3]string {
+	return [3]string{
+		f.Identifier,
+		FunctionType,
+		f.ReturnType,
+	}
 }

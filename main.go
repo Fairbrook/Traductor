@@ -93,6 +93,6 @@ func main() {
 }
 
 func main2() {
-	table, _ := Semantico.Analize("int suma(int a, int b){return a+b;}")
+	table, _ := Semantico.Analize("int suma(int a, int b){while(a==b){}}")
 	table.ToArray()
 }

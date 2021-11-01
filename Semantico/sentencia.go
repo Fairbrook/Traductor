@@ -135,9 +135,9 @@ func procWhile(tree *Utils.Tree, table *Table, function Function) []error {
 	e, retType := procExpresion(iterator, table)
 	errors = append(errors, e...)
 	if retType != "bool" {
-		errors = append(errors, fmt.Errorf("expresion no booleana en if"))
+		errors = append(errors, fmt.Errorf("expresion no booleana en while"))
 	}
-	iterator = iterator.Next
+	iterator = iterator.Next.Next
 	sentences := iterator.Children.Next
 
 	blockTable := Table{}

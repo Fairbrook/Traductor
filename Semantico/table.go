@@ -8,8 +8,9 @@ type TableEntry struct {
 }
 
 type Table struct {
-	ts    map[string]TableEntry
-	Stack Utils.Stack
+	ts     map[string]TableEntry
+	Stack  Utils.Stack
+	Parent Symbol
 }
 
 func (t *Table) Set(symbol Symbol, subtable *Table) {
@@ -25,6 +26,9 @@ func (t *Table) Get(identifier string) Symbol {
 	if ok {
 		return item.symbol
 	}
+	if t.Parent != nil && t.Parent.getIdentifier() == identifier {
+		return t.Parent
+	}
 	iterator := t.Stack.GetListPointer()
 	for iterator != nil {
 		if iterator.Data.(Symbol).getIdentifier() == identifier {
@@ -35,10 +39,16 @@ func (t *Table) Get(identifier string) Symbol {
 	return nil
 }
 
-func (t *Table) Includes(identifier string) bool {
+func (t *Table) Includes(identifier string, sameScope bool) bool {
 	_, ok := t.ts[identifier]
 	if ok {
 		return true
+	}
+	if t.Parent != nil && t.Parent.getIdentifier() == identifier {
+		return true
+	}
+	if sameScope {
+		return false
 	}
 	iterator := t.Stack.GetListPointer()
 	for iterator != nil {

@@ -24,8 +24,8 @@ func defVar(tree *Utils.Tree, table *Table, pastType string) []error {
 
 	localErrors = append(localErrors, defVar(iterator.Next, table, variable.Type)...)
 	// iterator = iterator.Next
-	if table.Includes(variable.Identifier) {
-		localErrors = append(localErrors, fmt.Errorf("la variable %s ya se encuentra declarada", variable.Identifier))
+	if table.Includes(variable.Identifier, true) {
+		localErrors = append(localErrors, fmt.Errorf("el símbolo %s ya se encuentra declarado", variable.Identifier))
 	}
 	table.Set(&variable, nil)
 	return localErrors

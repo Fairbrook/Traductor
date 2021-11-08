@@ -12,12 +12,12 @@ type Lexico struct {
 	Input     string
 }
 
-func (lex *Lexico) NextSegment() (segment Segment, err error) {
+func (lex *Lexico) NextSegment(currentLine int) (segment Segment, err error) {
 	if lex.index >= len(lex.Input) {
 		err = errors.New("Index fuera de rango")
 		return
 	}
-	segment, err = evaluate(lex.Input[lex.index:])
+	segment, err = evaluate(lex.Input[lex.index:], currentLine)
 	lex.prevIndex = lex.index
 	lex.index += segment.Index
 	if err != nil {

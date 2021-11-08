@@ -64,11 +64,13 @@ func initialNode() Utils.Node {
 func GenerateSyntacticTree(str string) (tree Utils.Tree, err error) {
 	var pila Utils.Stack
 	var segment Lexico.Segment
+	currentLine := 0
 	analizadorLexico := Lexico.Lexico{Input: str + "$"}
 	node := initialNode()
 	pila.Push(Utils.Tree{Root: node})
 	for !pila.IsEmpty() {
-		segment, err = analizadorLexico.NextSegment()
+		segment, err = analizadorLexico.NextSegment(currentLine)
+		currentLine = segment.Line
 		if err != nil {
 			return
 		}

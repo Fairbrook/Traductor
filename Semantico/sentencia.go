@@ -19,6 +19,10 @@ func procTermino(tree *Utils.Tree, table *Table) ([]error, string) {
 		{
 			termData := table.Get(term.Lexema)
 			if termData != nil {
+				if termData.getType() != VariableType {
+					errors = append(errors, fmt.Errorf("el identificador %s no es una vriable", term.Lexema))
+					break
+				}
 				retType = termData.(*Variable).Type
 			} else {
 				errors = append(errors, fmt.Errorf("el identificador %s no esta definido", term.Lexema))

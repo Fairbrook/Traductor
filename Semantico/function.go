@@ -81,13 +81,13 @@ func defFunc(tree *Utils.Tree, table *Table) []error {
 	parameters, errs := getParams(paramPointer, &functionTable)
 	fun.Parameters = parameters
 
-	functionTable.Stack.Push(&fun)
+	functionTable.Parent = &fun
 	if len(errs) > 0 {
 		localErrors = append(localErrors, errs...)
 	}
 
-	if table.Includes(fun.Identifier) {
-		localErrors = append(localErrors, fmt.Errorf("la función %s ya se encuentra declarada", fun.Identifier))
+	if table.Includes(fun.Identifier, false) {
+		localErrors = append(localErrors, fmt.Errorf("el símbolo %s ya se encuentra declarado", fun.Identifier))
 	}
 
 	table.Set(&fun, &functionTable)

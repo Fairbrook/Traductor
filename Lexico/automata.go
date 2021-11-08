@@ -99,7 +99,7 @@ var terminals = map[uint8]string{
 	19: "Decimal",
 }
 
-func evaluate(str string) (segment Segment, err error) {
+func evaluate(str string, currentLine int) (segment Segment, err error) {
 	segment.Lexema = ""
 	segment.StateName = ""
 	segment.State = 0
@@ -107,6 +107,9 @@ func evaluate(str string) (segment Segment, err error) {
 	err = nil
 
 	for isSpace(str[start]) {
+		if str[start] == '\n' {
+			currentLine++
+		}
 		start++
 	}
 
@@ -133,6 +136,7 @@ func evaluate(str string) (segment Segment, err error) {
 			segment.Index = index
 			if name, ok := terminals[segment.State]; ok {
 				segment.StateName = name
+				segment.Line = currentLine
 				return
 			}
 			err = errors.New(fmt.Sprintf("Caracter inesperado '%c'", str[index]))
@@ -145,6 +149,7 @@ func evaluate(str string) (segment Segment, err error) {
 	segment.Index = len(str)
 	if name, ok := terminals[segment.State]; ok {
 		segment.StateName = name
+		segment.Line = currentLine
 		return
 	}
 	err = errors.New(fmt.Sprintf("Final de cadena inesperado al interpretar %s", str))

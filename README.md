@@ -7,7 +7,7 @@ Para el sistema operativo Windows 64bits puede ejecutar el archivo [.exe](https:
 ### Compilador
 
 Si bien el programa puede realizar la traducción por si solo, para el último paso de la compilación es necesario tener instalado en el sistema el compilador [MASM32](http://masm32.com/download.htm).
-Y su binario deberá estar en la variable `%PATH%` del sistema
+Y su carpeta de binarios `C:\masm32\bin` deberá estar en la variable `%PATH%` del sistema
 
 ⚠ **Es necesario ejecutar la aplicación dentro del mismo disco en el que MASM32 fue instalado**
 

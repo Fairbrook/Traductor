@@ -1,21 +1,22 @@
 package Semantico
 
 import (
-	"fmt"
-
 	"github.com/Fairbrook/analizador/Utils"
 )
 
-func localDef(tree *Utils.Tree, table *Table, function Function) []error {
+func localDef(tree *Utils.Tree, table *Table, function Function) ([]error, []Symbol) {
 	if tree.Children == nil {
-		return make([]error, 0)
+		return make([]error, 0), make([]Symbol, 0)
 	}
 	defType := tree.Root.(Utils.Node).Segment.Lexema
 	switch defType {
 	case "DefLocales":
 		{
-			localErrors := localDef(tree.Children, table, function)
-			return append(localErrors, localDef(tree.Children.Next, table, function)...)
+			errors, simbols := localDef(tree.Children, table, function)
+			nextErrors, nextSimbols := localDef(tree.Children.Next, table, function)
+			errors = append(errors, nextErrors...)
+			simbols = append(simbols, nextSimbols...)
+			return errors, simbols
 		}
 	case "DefLocal":
 		return localDef(tree.Children, table, function)
@@ -24,12 +25,13 @@ func localDef(tree *Utils.Tree, table *Table, function Function) []error {
 	case "Sentencia":
 		return procSentencia(tree, table, function)
 	default:
-		return make([]error, 0)
+		return make([]error, 0), make([]Symbol, 0)
 
 	}
 }
 
-func getParams(params *Utils.Tree, table *Table) (parameters map[string]Variable, errs []error) {
+func getParams(params *Utils.Tree, table *Table) (parameters map[string]Variable, list []Variable, errs []error) {
+	list = make([]Variable, 0)
 	if params.Children == nil {
 		parameters = map[string]Variable{}
 		return
@@ -45,12 +47,19 @@ func getParams(params *Utils.Tree, table *Table) (parameters map[string]Variable
 	variable.Type = iterator.Root.(Utils.Node).Segment.Lexema
 
 	iterator = iterator.Next
-	variable.Identifier = iterator.Root.(Utils.Node).Segment.Lexema
+	variable.Segment = iterator.Root.(Utils.Node).Segment
+	variable.Identifier = variable.Segment.Lexema
+	list = []Variable{variable}
 
 	iterator = iterator.Next
-	parameters, errs = getParams(iterator, table)
+	var rest []Variable
+	parameters, rest, errs = getParams(iterator, table)
+	list = append(list, rest...)
 	if _, ok := parameters[variable.Identifier]; ok {
-		errs = append(errs, fmt.Errorf("el parametro %s ya se encuentra declarado", variable.Identifier))
+		errs = append(errs, &Utils.SegmentError{
+			Segment: table.Parent.GetSegment(),
+			Message: Utils.DeclaredMsg,
+		})
 		return
 	}
 	parameters[variable.Identifier] = variable
@@ -58,7 +67,7 @@ func getParams(params *Utils.Tree, table *Table) (parameters map[string]Variable
 	return
 }
 
-func defFunc(tree *Utils.Tree, table *Table) []error {
+func defFunc(tree *Utils.Tree, table *Table) ([]error, []Symbol) {
 	var localErrors []error
 	fun := Function{}
 	functionTable := Table{}
@@ -67,7 +76,8 @@ func defFunc(tree *Utils.Tree, table *Table) []error {
 	fun.ReturnType = iterator.Root.(Utils.Node).Segment.Lexema
 
 	iterator = iterator.Next
-	fun.Identifier = iterator.Root.(Utils.Node).Segment.Lexema
+	fun.Segment = iterator.Root.(Utils.Node).Segment
+	fun.Identifier = fun.Segment.Lexema
 
 	iterator = iterator.Next.Next
 	paramPointer := iterator
@@ -78,19 +88,33 @@ func defFunc(tree *Utils.Tree, table *Table) []error {
 	functionTable.Stack = table.Stack
 	functionTable.Stack = table.dumpStack()
 
-	parameters, errs := getParams(paramPointer, &functionTable)
-	fun.Parameters = parameters
-
 	functionTable.Parent = &fun
+
+	parameters, list, errs := getParams(paramPointer, &functionTable)
+	fun.Parameters = parameters
+	fun.ParamList = list
+
 	if len(errs) > 0 {
 		localErrors = append(localErrors, errs...)
 	}
 
 	if table.Includes(fun.Identifier, false) {
-		localErrors = append(localErrors, fmt.Errorf("el símbolo %s ya se encuentra declarado", fun.Identifier))
+		localErrors = append(localErrors, &Utils.SegmentError{
+			Segment: fun.Segment,
+			Message: Utils.DeclaredMsg,
+		})
 	}
 
 	table.Set(&fun, &functionTable)
-	return append(localErrors, localDef(functionBlock.Children.Next, &functionTable, fun)...)
-
+	errors, simbols := localDef(functionBlock.Children.Next, &functionTable, fun)
+	errors = append(localErrors, errors...)
+	fun.Sentences = simbols
+	if !fun.HasReturn() && fun.ReturnType != "void" {
+		errors = append(errors, &Utils.SegmentError{
+			Segment: fun.Segment,
+			Message: Utils.NoReturnMsg,
+		})
+	}
+	simbols = []Symbol{&fun}
+	return errors, simbols
 }

@@ -1,9 +1,6 @@
 package Sintactico
 
 import (
-	"errors"
-	"fmt"
-
 	Lexico "github.com/Fairbrook/analizador/Lexico"
 	Utils "github.com/Fairbrook/analizador/Utils"
 )
@@ -22,12 +19,13 @@ type Step struct {
 	Output string `json:"output"`
 }
 
-func segmentToNode(segment Lexico.Segment, state int) Utils.Node {
+func segmentToNode(segment Utils.Segment, state int) Utils.Node {
 	return Utils.Node{
 		Segment: Utils.Segment{
 			Lexema: segment.Lexema,
 			Index:  segment.Index,
 			Type:   int(segment.State),
+			Line:   segment.Line,
 		},
 		State: state,
 	}
@@ -63,21 +61,22 @@ func initialNode() Utils.Node {
 
 func GenerateSyntacticTree(str string) (tree Utils.Tree, err error) {
 	var pila Utils.Stack
-	var segment Lexico.Segment
-	currentLine := 0
+	var segment Utils.Segment
 	analizadorLexico := Lexico.Lexico{Input: str + "$"}
 	node := initialNode()
 	pila.Push(Utils.Tree{Root: node})
 	for !pila.IsEmpty() {
-		segment, err = analizadorLexico.NextSegment(currentLine)
-		currentLine = segment.Line
+		segment, err = analizadorLexico.NextSegment()
 		if err != nil {
 			return
 		}
 		top := pila.Top.(Utils.Tree).Root.(Utils.Node).State
 		if next, ok := States[top][int(segment.State)]; ok {
 			if next == 0 {
-				err = errors.New(fmt.Sprintf("Cadena inesperada %s", segment.Lexema))
+				err = &Utils.SegmentError{
+					Segment: segment,
+					Message: Utils.CadenaMsg,
+				}
 				return
 			}
 
@@ -98,7 +97,10 @@ func GenerateSyntacticTree(str string) (tree Utils.Tree, err error) {
 			pila.Push(tree)
 			continue
 		}
-		err = errors.New(fmt.Sprintf("Cadena inesperada %s", segment.Lexema))
+		err = &Utils.SegmentError{
+			Segment: segment,
+			Message: Utils.CadenaMsg,
+		}
 		return
 	}
 	return

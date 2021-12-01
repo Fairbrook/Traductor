@@ -2,6 +2,7 @@ const globals = {
   timer: null,
   isAstilectronReady: false,
   resultNode: null,
+  currentText: "",
 };
 
 function docReady(fn) {
@@ -46,6 +47,7 @@ function sendChange(text) {
     globals.resultNode.dispatchEvent(new CustomEvent("empty"));
     return;
   }
+  globals.currentText = text;
 
   const message = { name: "process", payload: text };
   astilectron.sendMessage(message, function (message) {
@@ -79,6 +81,7 @@ function defineData() {
   Alpine.data("results", () => ({
     segments: [],
     res: false,
+    plain: false,
     proc: "",
     error: "",
     result: {
@@ -87,6 +90,14 @@ function defineData() {
         this.error = "";
         this.segments = detail;
         this.proc = "";
+        this.plain = false;
+      },
+      ["@plain"]({ detail }) {
+        this.res = true;
+        this.error = "";
+        this.segments = detail;
+        this.proc = "";
+        this.plain = true;
       },
       ["@empty"]() {
         this.res = false;
@@ -110,5 +121,20 @@ function defineData() {
 document.addEventListener("alpine:init", defineData);
 document.addEventListener("astilectron-ready", () => {
   globals.isAstilectronReady = true;
+  astilectron.onMessage(function (msg) {
+    let handler = ()=>{}
+    if(msg==="run"){
+      handler = (result)=>{
+        console.log(result)
+        globals.resultNode.dispatchEvent(
+          new CustomEvent("plain", { detail: result.payload })
+        );
+      }
+    }
+    console.log(globals.currentText);
+    const message = { name: msg, payload: globals.currentText };
+    astilectron.sendMessage(message, handler);
+    return;
+  });
 });
 docReady(configureQuill);

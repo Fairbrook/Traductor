@@ -1,6 +1,10 @@
 package main
 
-//import "fmt"
+// import (
+// 	"fmt"
+
+// 	"github.com/Fairbrook/analizador/Assembler"
+// )
 
 import (
 	"flag"
@@ -8,7 +12,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Fairbrook/analizador/Semantico"
+	"github.com/Fairbrook/analizador/Assembler"
 	"github.com/asticode/go-astikit"
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
@@ -27,7 +31,7 @@ var (
 	w     *astilectron.Window
 )
 
-func main2() {
+func main() {
 	l := log.New(log.Writer(), log.Prefix(), log.Flags())
 
 	fs.Parse(os.Args[1:])
@@ -50,28 +54,36 @@ func main2() {
 		MenuOptions: []*astilectron.MenuItemOptions{{
 			Label: astikit.StrPtr("File"),
 			SubMenu: []*astilectron.MenuItemOptions{
-				// {
-				// 	Label: astikit.StrPtr("About"),
-				// 	OnClick: func(e astilectron.Event) (deleteListener bool) {
-				// 		if err := bootstrap.SendMessage(w, "about", htmlAbout, func(m *bootstrap.MessageIn) {
-				// 			// Unmarshal payload
-				// 			var s string
-				// 			if err := json.Unmarshal(m.Payload, &s); err != nil {
-				// 				l.Println(fmt.Errorf("unmarshaling payload failed: %w", err))
-				// 				return
-				// 			}
-				// 			l.Printf("About modal has been displayed and payload is %s!\n", s)
-				// 		}); err != nil {
-				// 			l.Println(fmt.Errorf("sending about event failed: %w", err))
-				// 		}
-				// 		return
-				// 	},
-				// },
 				{Role: astilectron.MenuItemRoleClose},
+				{
+					Label: astikit.StrPtr("Traducir a ensamblador"),
+					OnClick: func(e astilectron.Event) (deleteListener bool) {
+						w.SendMessage("translate")
+						return
+					},
+				},
+			},
+		}, {
+			Label: astikit.StrPtr("Compilacion"),
+			SubMenu: []*astilectron.MenuItemOptions{
+				{
+					Label: astikit.StrPtr("Compilar"),
+					OnClick: func(e astilectron.Event) (deleteListener bool) {
+						w.SendMessage("compile")
+						return
+					},
+				},
+				{
+					Label: astikit.StrPtr("Compilar y ejecutar"),
+					OnClick: func(e astilectron.Event) (deleteListener bool) {
+						w.SendMessage("run")
+						return
+					},
+				},
 			},
 		}},
 		OnWait: func(_ *astilectron.Astilectron, ws []*astilectron.Window, _ *astilectron.Menu, _ *astilectron.Tray, _ *astilectron.Menu) error {
-			// w = ws[0]
+			w = ws[0]
 			// w.OpenDevTools()
 			return nil
 		},
@@ -89,10 +101,15 @@ func main2() {
 	}); err != nil {
 		l.Fatal(fmt.Errorf("running boostrap failed: %w", err))
 	}
-
 }
 
-func main() {
-	table, _ := Semantico.Analize("int suma(int a, int b){\nwhile(a){}}")
-	table.ToArray()
+func main2() {
+	assembler := Assembler.Translator{
+		Filename: "trans.asm",
+	}
+	result, err := assembler.TranslateAndOpen("int hola;float suma(float a, float b){return a +b;}\nint main()\n{float a; a=suma(10.0,5.8);int b;while(a>0.0){printF(a);printS(\"\\n\");a=a-1.0;}printI(hola);return 0;}")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(result)
 }

@@ -3,6 +3,8 @@ package Lexico
 import (
 	"errors"
 	"fmt"
+
+	"github.com/Fairbrook/analizador/Utils"
 )
 
 const noState uint8 = 255
@@ -99,7 +101,7 @@ var terminals = map[uint8]string{
 	19: "Decimal",
 }
 
-func evaluate(str string, currentLine int) (segment Segment, err error) {
+func evaluate(str string, currentLine int) (segment Utils.Segment, err error) {
 	segment.Lexema = ""
 	segment.StateName = ""
 	segment.State = 0
@@ -139,7 +141,14 @@ func evaluate(str string, currentLine int) (segment Segment, err error) {
 				segment.Line = currentLine
 				return
 			}
-			err = errors.New(fmt.Sprintf("Caracter inesperado '%c'", str[index]))
+			err = &Utils.SegmentError{
+				Segment: Utils.Segment{
+					Lexema: segment.Lexema,
+					Line:   currentLine,
+					Index:  segment.Index,
+				},
+				Message: Utils.CaracterMsg,
+			}
 			return
 		}
 		segment.State = nextState

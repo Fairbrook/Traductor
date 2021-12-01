@@ -2,26 +2,30 @@ package Lexico
 
 import (
 	"errors"
-	"fmt"
-	"strings"
+
+	"github.com/Fairbrook/analizador/Utils"
 )
 
 type Lexico struct {
-	index     int
-	prevIndex int
-	Input     string
+	index       int
+	prevIndex   int
+	currentLine int
+	prevLine    int
+	Input       string
 }
 
-func (lex *Lexico) NextSegment(currentLine int) (segment Segment, err error) {
+func (lex *Lexico) NextSegment() (segment Utils.Segment, err error) {
 	if lex.index >= len(lex.Input) {
 		err = errors.New("Index fuera de rango")
 		return
 	}
-	segment, err = evaluate(lex.Input[lex.index:], currentLine)
+	segment, err = evaluate(lex.Input[lex.index:], lex.currentLine)
 	lex.prevIndex = lex.index
 	lex.index += segment.Index
+	lex.prevLine = lex.currentLine
+	lex.currentLine = segment.Line
+	segment.Line = segment.Line + 1
 	if err != nil {
-		err = errors.New(err.Error() + fmt.Sprintf(" en la linea %d", strings.Count(lex.Input[0:lex.index], "\n")+1))
 		return
 	}
 	segment = getSpecialType(segment)
@@ -37,5 +41,6 @@ func (lex *Lexico) GetLast() string {
 }
 
 func (lex *Lexico) GoBack() {
+	lex.currentLine = lex.prevLine
 	lex.index = lex.prevIndex
 }

@@ -1,50 +1,70 @@
 package Semantico
 
 import (
-	"fmt"
-
 	"github.com/Fairbrook/analizador/Utils"
 )
 
-func procTermino(tree *Utils.Tree, table *Table) ([]error, string) {
+func procTermino(tree *Utils.Tree, table *Table) ([]error, Expression) {
 	errors := make([]error, 0)
-	var retType string
 	iterator := tree.Children
 	term := iterator.Root.(Utils.Node).Segment
+	var symbol Symbol
 	if term.Lexema == "LlamadaFunc" {
 		return procCall(iterator, table)
 	}
 	switch term.Type {
 	case 0:
 		{
-			termData := table.Get(term.Lexema)
+			termData, _ := table.Get(term.Lexema)
 			if termData != nil {
-				if termData.getType() != VariableType {
-					errors = append(errors, fmt.Errorf("el identificador %s no es una vriable", term.Lexema))
+				if termData.GetType() != VariableType {
+					errors = append(errors, &Utils.SegmentError{
+						Segment: term,
+						Message: Utils.NoVarMsg,
+					})
 					break
 				}
-				retType = termData.(*Variable).Type
+				symbol = termData.(*Variable)
 			} else {
-				errors = append(errors, fmt.Errorf("el identificador %s no esta definido", term.Lexema))
+				errors = append(errors, &Utils.SegmentError{
+					Segment: term,
+					Message: Utils.NoDefMsg,
+				})
 			}
 			break
 		}
 	case 1:
-		retType = "int"
+		symbol = &Literal{
+			Value:      term.Lexema,
+			ReturnType: "int",
+			Segment:    term,
+		}
 	case 2:
-		retType = "float"
+		symbol = &Literal{
+			Value:      term.Lexema,
+			ReturnType: "float",
+			Segment:    term,
+		}
 	case 3:
-		retType = "char*"
+		symbol = &Literal{
+			Value:      term.Lexema,
+			ReturnType: "char*",
+			Segment:    term,
+		}
 	}
 
-	return errors, retType
+	return errors, Expression{
+		ReturnType: symbol.GetReturnType(),
+		Subtype:    "Termino",
+		Parts:      []Symbol{symbol},
+	}
 }
 
-func procExpresion(tree *Utils.Tree, table *Table) ([]error, string) {
+func procExpresion(tree *Utils.Tree, table *Table) ([]error, Expression) {
 	errors := make([]error, 0)
 	var retType string
 	if tree.Children == nil {
-		return errors, retType
+		return errors, Expression{}
 	}
 	iterator := tree.Children
 	lexema := iterator.Root.(Utils.Node).Segment.Lexema
@@ -53,35 +73,55 @@ func procExpresion(tree *Utils.Tree, table *Table) ([]error, string) {
 	}
 
 	if lexema == "Expresion" {
-		e, t := procExpresion(iterator, table)
+		expression := Expression{
+			Subtype: "OP",
+		}
+		e, ex := procExpresion(iterator, table)
 		errors = append(errors, e...)
+		expression.Parts = []Symbol{&ex}
+
 		iterator = iterator.Next
 		operatorSeg := iterator.Root.(Utils.Node).Segment
 		operator := OpByType[operatorSeg.Type]
-		retType = t
+		expression.Parts = append(expression.Parts, &OperatorSymbol{
+			Operator: operator,
+			Segment:  operatorSeg,
+		})
+
+		retType = ex.GetReturnType()
 		iterator = iterator.Next
 		if (!operator.isBinary && iterator != nil) ||
 			(operator.isBinary && iterator == nil) ||
-			!operator.acceptType(t) {
-			errors = append(errors, fmt.Errorf("expresion invalida"))
-			return errors, retType
+			!operator.acceptType(ex.GetReturnType()) {
+			errors = append(errors, &Utils.SegmentError{
+				Segment: operatorSeg,
+				Message: Utils.WrongOpMsg,
+			})
+			return errors, expression
 		}
-		e, t = procExpresion(iterator, table)
-		errors = append(errors, e...)
-		if t != "" && retType != t {
-			errors = append(errors, fmt.Errorf("los tipos en la expresion no coinciden"))
+
+		e2, ex2 := procExpresion(iterator, table)
+		errors = append(errors, e2...)
+		expression.Parts = append(expression.Parts, &ex2)
+
+		if ex2.GetReturnType() != "" && retType != ex2.GetReturnType() {
+			errors = append(errors, &Utils.SegmentError{
+				Segment: operatorSeg,
+				Message: Utils.WrongOpMsg,
+			})
 		}
 		if operator.returnType != "same" {
 			retType = operator.returnType
 		}
-		return errors, retType
+		expression.ReturnType = retType
+		return errors, expression
 	}
-	return errors, retType
+	return errors, Expression{}
 }
 
-func getArgs(tree *Utils.Tree, table *Table) ([]error, []string) {
+func getArgs(tree *Utils.Tree, table *Table) ([]error, []Expression) {
 	errors := make([]error, 0)
-	values := make([]string, 0)
+	values := make([]Expression, 0)
 	if tree == nil || tree.Children == nil {
 		return errors, values
 	}
@@ -89,11 +129,11 @@ func getArgs(tree *Utils.Tree, table *Table) ([]error, []string) {
 	if iterator.Root.(Utils.Node).Segment.Lexema == "," {
 		iterator = iterator.Next
 	}
-	var retType string
 	var err []error
-	err, retType = procExpresion(iterator, table)
+	var ex Expression
+	err, ex = procExpresion(iterator, table)
 	errors = append(errors, err...)
-	values = append(values, retType)
+	values = append(values, ex)
 
 	err, retArray := getArgs(iterator.Next, table)
 	errors = append(errors, err...)
@@ -101,45 +141,72 @@ func getArgs(tree *Utils.Tree, table *Table) ([]error, []string) {
 	return errors, values
 }
 
-func procCall(tree *Utils.Tree, table *Table) ([]error, string) {
+func procCall(tree *Utils.Tree, table *Table) ([]error, Expression) {
 	errors := make([]error, 0)
-	id := tree.Children.Root.(Utils.Node).Segment.Lexema
+	call := tree.Children.Root.(Utils.Node).Segment
+	id := call.Lexema
 	arguPointer := tree.Children.Next.Next
-	funSym := table.Get(id)
+	funSym, _ := table.Get(id)
+	expression := Expression{}
 	if funSym == nil {
-		errors = append(errors, fmt.Errorf("no se encontro una definicion de la funcion %s", id))
-		return errors, ""
+		errors = append(errors, &Utils.SegmentError{
+			Segment: call,
+			Message: Utils.NoDefMsg,
+		})
+		return errors, expression
 	}
 	fun := funSym.(*Function)
+	expression.Parts = []Symbol{fun}
+	expression.ReturnType = fun.ReturnType
+	expression.Subtype = "LlamadaFunc"
+
 	err, arguments := getArgs(arguPointer, table)
-	i := 0
 	errors = append(errors, err...)
 	if len(arguments) < len(fun.Parameters) {
-		errors = append(errors, fmt.Errorf("muy pocos argumentos para llamar a la función %s", fun.Identifier))
-		return errors, fun.ReturnType
+		errors = append(errors, &Utils.SegmentError{
+			Segment: call,
+			Message: Utils.ArgsMsg,
+		})
+		return errors, expression
 	}
 	if len(arguments) > len(fun.Parameters) {
-		errors = append(errors, fmt.Errorf("muchos argumentos para llamar a la función %s", fun.Identifier))
-		return errors, fun.ReturnType
+		errors = append(errors, &Utils.SegmentError{
+			Segment: call,
+			Message: Utils.ArgsMsg,
+		})
+		return errors, expression
 	}
-	for _, param := range fun.Parameters {
 
-		if param.Type != arguments[i] {
-			errors = append(errors, fmt.Errorf("la llamada a la funcion %s no recuerda co la declaracion", fun.Identifier))
+	i := 0
+	for _, param := range fun.ParamList {
+		if param.Type != arguments[i].GetReturnType() {
+			errors = append(errors, &Utils.SegmentError{
+				Segment: call,
+				Message: Utils.ArgsMsg,
+			})
 			break
 		}
+		expression.Parts = append(expression.Parts, &arguments[i])
 		i++
 	}
-	return errors, fun.ReturnType
+
+	return errors, expression
 }
 
-func procWhile(tree *Utils.Tree, table *Table, function Function) []error {
+func procWhile(tree *Utils.Tree, table *Table, function Function) ([]error, Conditional) {
 	errors := make([]error, 0)
+	conditional := Conditional{
+		Subtype: "while",
+	}
 	iterator := tree.Children.Next.Next
-	e, retType := procExpresion(iterator, table)
+	e, ex := procExpresion(iterator, table)
+	conditional.Expression = ex
 	errors = append(errors, e...)
-	if retType != "bool" {
-		errors = append(errors, fmt.Errorf("expresion no booleana en while"))
+	if ex.GetReturnType() != "bool" {
+		errors = append(errors, &Utils.SegmentError{
+			Segment: iterator.Root.(Utils.Node).Segment,
+			Message: Utils.NoBoolMsg,
+		})
 	}
 	iterator = iterator.Next.Next
 	sentences := iterator.Children.Next
@@ -147,18 +214,27 @@ func procWhile(tree *Utils.Tree, table *Table, function Function) []error {
 	blockTable := Table{}
 	blockTable.Stack = table.dumpStack()
 
-	e = procSentencias(sentences, &blockTable, function)
+	e, conditional.Sentences = procSentencias(sentences, &blockTable, function)
 	errors = append(errors, e...)
 
-	return errors
+	return errors, conditional
 }
-func procIf(tree *Utils.Tree, table *Table, function Function) []error {
+func procIf(tree *Utils.Tree, table *Table, function Function) ([]error, Conditional) {
 	errors := make([]error, 0)
+	conditional := Conditional{
+		Subtype: "if",
+	}
+
 	iterator := tree.Children.Next.Next
-	e, retType := procExpresion(iterator, table)
+	e, ex := procExpresion(iterator, table)
+	conditional.Expression = ex
+
 	errors = append(errors, e...)
-	if retType != "bool" {
-		errors = append(errors, fmt.Errorf("expresion no booleana en if"))
+	if ex.GetReturnType() != "bool" {
+		errors = append(errors, &Utils.SegmentError{
+			Segment: iterator.Root.(Utils.Node).Segment,
+			Message: Utils.NoBoolMsg,
+		})
 	}
 	iterator = iterator.Next.Next
 	sentences := iterator.Children.Children.Next
@@ -166,80 +242,121 @@ func procIf(tree *Utils.Tree, table *Table, function Function) []error {
 	blockTable := Table{}
 	blockTable.Stack = table.dumpStack()
 
-	e = procSentencias(sentences, &blockTable, function)
+	e, conditional.Sentences = procSentencias(sentences, &blockTable, function)
 	errors = append(errors, e...)
 
 	iterator = iterator.Next
 	if iterator.Children == nil {
-		return errors
+		return errors, conditional
 	}
 	sentences = iterator.Children.Next.Children.Children.Next
 
 	elseTable := Table{}
 	elseTable.Stack = table.dumpStack()
-	e = procSentencias(sentences, &blockTable, function)
+	e, conditional.AltSentences = procSentencias(sentences, &blockTable, function)
 	errors = append(errors, e...)
 
-	return errors
+	return errors, conditional
 }
 
-func procSentencias(tree *Utils.Tree, table *Table, function Function) []error {
+func procSentencias(tree *Utils.Tree, table *Table, function Function) ([]error, []Symbol) {
 	errors := make([]error, 0)
+	symbols := make([]Symbol, 0)
 	if tree.Children == nil {
-		return errors
+		return errors, symbols
 	}
-	err := procSentencia(tree.Children, table, function)
+	err, sym := procSentencia(tree.Children, table, function)
 	errors = append(errors, err...)
-	err = procSentencias(tree.Children.Next, table, function)
+	symbols = append(symbols, sym...)
+	err, sym = procSentencias(tree.Children.Next, table, function)
 	errors = append(errors, err...)
-	return errors
+	symbols = append(symbols, sym...)
+
+	return errors, symbols
 }
 
-func procSentencia(tree *Utils.Tree, table *Table, function Function) []error {
+func procReturn(tree *Utils.Tree, table *Table, function Function) ([]error, []Symbol) {
+	errors := make([]error, 0)
+	err, ex := procExpresion(tree.Next.Children, table)
+	errors = append(errors, err...)
+	if ex.GetReturnType() != function.ReturnType {
+		seg := tree.Next.Children.Root.(Utils.Node).Segment
+		errors = append(errors, &Utils.SegmentError{
+			Segment: Utils.Segment{
+				Lexema: function.GetIdentifier(),
+				Line:   seg.Line,
+				Index:  seg.Index,
+			},
+			Message: Utils.RetMsg,
+		})
+	}
+
+	return errors, []Symbol{
+		&Expression{
+			ReturnType: function.GetReturnType(),
+			Subtype:    "return",
+			Parts:      []Symbol{&ex},
+		},
+	}
+}
+
+func procSentencia(tree *Utils.Tree, table *Table, function Function) ([]error, []Symbol) {
 	errors := make([]error, 0)
 	iterator := tree.Children
 	lexema := iterator.Root.(Utils.Node).Segment.Lexema
 	switch lexema {
 	case "LlamadaFunc":
 		{
-			err, _ := procCall(iterator, table)
+			err, ex := procCall(iterator, table)
 			errors = append(errors, err...)
-			return errors
+			return errors, []Symbol{&ex}
 		}
 	case "if":
 		{
-			err := procIf(tree, table, function)
+			err, con := procIf(tree, table, function)
 			errors = append(errors, err...)
-			return errors
+			return errors, []Symbol{&con}
 		}
 	case "while":
 		{
-			err := procWhile(tree, table, function)
+			err, con := procWhile(tree, table, function)
 			errors = append(errors, err...)
-			return errors
+			return errors, []Symbol{&con}
 		}
 	case "return":
 		{
-			err, retType := procExpresion(iterator.Next.Children, table)
+			err, con := procReturn(iterator, table, function)
 			errors = append(errors, err...)
-			if retType != function.ReturnType {
-				errors = append(errors, fmt.Errorf("el valor de retorno no corresponde con el valor definido de la funcion %s", function.getIdentifier()))
-			}
-			return errors
+			return errors, con
 		}
 	default:
 		{
-			variable := table.Get(lexema)
-			err, retType := procExpresion(iterator.Next.Next, table)
+			variable, _ := table.Get(lexema)
+			err, ex := procExpresion(iterator.Next.Next, table)
 			errors = append(errors, err...)
 			if variable == nil {
-				errors = append(errors, fmt.Errorf("la variable %s no esta definida", lexema))
-				return errors
+				errors = append(errors, &Utils.SegmentError{
+					Segment: iterator.Root.(Utils.Node).Segment,
+					Message: Utils.NoDefMsg,
+				})
+				return errors, []Symbol{}
 			}
-			if retType != "" && variable.(*Variable).Type != retType {
-				errors = append(errors, fmt.Errorf("la variable %s no es de tipo %s", variable.getIdentifier(), retType))
+			if ex.GetReturnType() != "" && variable.(*Variable).Type != ex.GetReturnType() {
+				errors = append(errors, &Utils.SegmentError{
+					Segment: iterator.Root.(Utils.Node).Segment,
+					Message: Utils.WrongTypeMsg,
+				})
 			}
-			return errors
+			return errors, []Symbol{
+				&Expression{
+					ReturnType: ex.GetReturnType(),
+					Subtype:    "asign",
+					Parts: []Symbol{
+						variable,
+						&ex,
+					},
+				},
+			}
 		}
 	}
 }

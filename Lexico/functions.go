@@ -1,5 +1,7 @@
 package Lexico
 
+import "github.com/Fairbrook/analizador/Utils"
+
 var simbols = map[byte]byte{
 	';': 1,
 	',': 2,
@@ -87,7 +89,7 @@ func isSimbol(character byte) bool {
 	return false
 }
 
-func getSpecialType(in Segment) (out Segment) {
+func getSpecialType(in Utils.Segment) (out Utils.Segment) {
 	out = in
 	if in.State == 1 {
 		if _, ok := reserved[in.Lexema]; ok {

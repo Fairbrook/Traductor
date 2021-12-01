@@ -3,7 +3,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Parte 6 | Tabla de símbolos</title>
+    <title>Parte final | Traducción</title>
 
     <link rel="stylesheet" href="static/lib/quill/quill.snow.css" />
     <link rel="stylesheet" href="static/css/index.css" />
@@ -21,7 +21,14 @@
             <h4 x-text="e" class="error"></h4>
           </template>
         </div>
-        <div x-show="res && !proc">
+        <div x-show="res && !proc && plain">
+          <h2>Salida</h2>
+          <br>
+          <pre x-text="segments"></pre>
+        </div>
+        <div x-show="res && !proc && !plain">
+          <h2>Tabla de símbolos</h2>
+          <br>
           <div class="row">
             <div class="header">Simbolo</div>
             <div class="header">Tipo de simbolo</div>

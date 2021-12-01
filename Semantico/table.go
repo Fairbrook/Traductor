@@ -17,26 +17,26 @@ func (t *Table) Set(symbol Symbol, subtable *Table) {
 	if t.ts == nil {
 		t.ts = map[string]TableEntry{}
 	}
-	t.ts[symbol.getIdentifier()] = TableEntry{symbol: symbol, table: subtable}
+	t.ts[symbol.GetIdentifier()] = TableEntry{symbol: symbol, table: subtable}
 	t.Stack.Push(symbol)
 }
 
-func (t *Table) Get(identifier string) Symbol {
+func (t *Table) Get(identifier string) (Symbol, bool) {
 	item, ok := t.ts[identifier]
 	if ok {
-		return item.symbol
+		return item.symbol, true
 	}
-	if t.Parent != nil && t.Parent.getIdentifier() == identifier {
-		return t.Parent
+	if t.Parent != nil && t.Parent.GetIdentifier() == identifier {
+		return t.Parent, false
 	}
 	iterator := t.Stack.GetListPointer()
 	for iterator != nil {
-		if iterator.Data.(Symbol).getIdentifier() == identifier {
-			return iterator.Data.(Symbol)
+		if iterator.Data.(Symbol).GetIdentifier() == identifier {
+			return iterator.Data.(Symbol), false
 		}
 		iterator = iterator.Next
 	}
-	return nil
+	return nil, false
 }
 
 func (t *Table) Includes(identifier string, sameScope bool) bool {
@@ -44,7 +44,7 @@ func (t *Table) Includes(identifier string, sameScope bool) bool {
 	if ok {
 		return true
 	}
-	if t.Parent != nil && t.Parent.getIdentifier() == identifier {
+	if t.Parent != nil && t.Parent.GetIdentifier() == identifier {
 		return true
 	}
 	if sameScope {
@@ -52,7 +52,7 @@ func (t *Table) Includes(identifier string, sameScope bool) bool {
 	}
 	iterator := t.Stack.GetListPointer()
 	for iterator != nil {
-		if iterator.Data.(Symbol).getIdentifier() == identifier {
+		if iterator.Data.(Symbol).GetIdentifier() == identifier {
 			return true
 		}
 		iterator = iterator.Next
@@ -89,4 +89,20 @@ func (t *Table) toArrayInter(parent string) [][3]string {
 		}
 	}
 	return res
+}
+
+func (t *Table) DumpTable() []Symbol {
+	res := []Symbol{}
+	for _, val := range t.ts {
+		res = append(res, val.symbol)
+	}
+	return res
+}
+
+func (t *Table) GetSubTable(identifier string) *Table {
+	item, ok := t.ts[identifier]
+	if ok {
+		return item.table
+	}
+	return nil
 }

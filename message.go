@@ -4,18 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/Fairbrook/analizador/Assembler"
 	"github.com/Fairbrook/analizador/Semantico"
+	"github.com/Fairbrook/analizador/Utils"
 	"github.com/asticode/go-astilectron"
 	bootstrap "github.com/asticode/go-astilectron-bootstrap"
 )
-
-func errorsToArray(errors []error) []string {
-	res := []string{}
-	for _, e := range errors {
-		res = append(res, e.Error())
-	}
-	return res
-}
 
 func handleMessages(w *astilectron.Window, m bootstrap.MessageIn) (payload interface{}, err error) {
 	fmt.Printf(m.Name)
@@ -30,12 +24,60 @@ func handleMessages(w *astilectron.Window, m bootstrap.MessageIn) (payload inter
 				}
 			}
 			fmt.Printf(str)
-			table, errs := Semantico.Analize(str)
+			table, errs, _ := Semantico.Analize(str)
 			if len(errs) > 0 {
-				payload = errorsToArray(errs)
+				payload = Utils.ErrorsToArray(errs)
 				return
 			}
 			payload = table.ToArray()
+		}
+	case "translate":
+		{
+			var str string
+			if len(m.Payload) > 0 {
+				if err = json.Unmarshal(m.Payload, &str); err != nil {
+					payload = []string{err.Error()}
+					return
+				}
+			}
+			translator := Assembler.Translator{
+				Filename: "output.asm",
+			}
+			translator.TranslateAndOpen(str)
+		}
+	case "compile":
+		{
+			var str string
+			if len(m.Payload) > 0 {
+				if err = json.Unmarshal(m.Payload, &str); err != nil {
+					payload = []string{err.Error()}
+					return
+				}
+			}
+			translator := Assembler.Translator{
+				Filename: "output.asm",
+			}
+			translator.Compile(str)
+		}
+	case "run":
+		{
+			var str string
+			if len(m.Payload) > 0 {
+				if err = json.Unmarshal(m.Payload, &str); err != nil {
+					payload = []string{err.Error()}
+					return
+				}
+			}
+			translator := Assembler.Translator{
+				Filename: "output.asm",
+			}
+			res, errs := translator.CompileAndRun(str)
+			if errs != nil {
+				payload = errs.Error()
+				return
+			}
+			payload = res
+			return
 		}
 	}
 	return

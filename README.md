@@ -18,15 +18,18 @@ Mientras ingresa el código en el panel izquierdo, la tabla de símbolos aparece
 
 Una vez se esté conforme con el código escrito, el programa cuenta con 3 formas distintas de visualizar la traducción.
 En el menú _File_ está la opción _Traducir a ensamblador_ el cual realizará la traducción pertiente y abrirá el código resultante en el programa que se tenga registrado como por defecto
+
 ![pantalla](https://i.ibb.co/QfJyjhd/image.png)
 
 En el menú _Compilacion_ se encuentran las otras dos opciones, _Compilar_ y _Compilar y ejecutar_
+
 ![pantalla](https://i.ibb.co/z2yDL26/image.png)
 
 Ambos realizan una compilación del código, la diferencia radica en que, como su nombre lo indica, la segunda opción ejecuta el código compilado y lo muestra en la barra lateral derecha, como se muestra en la imagen
 ![pantalla](https://i.ibb.co/pyHfPkf/image.png)
 
 Cabe mencionar que todos los subproductos de la compilación son generados dentro de la carpeta que se encuentra ejecutandose la aplicación
+
 ![pantalla](https://i.ibb.co/LgZym3L/image.png)
 
 ## Introducción
@@ -115,10 +118,7 @@ int main(){
 }
 ```
 
-## Haz click [aquí](https://laughing-ardinghelli-16d744.netlify.app/) para ver el árbol de forma interactiva
-
-El cual da como resultado el siguiente árbol sintáctico
-![arbol](https://i.ibb.co/fS4nHHT/Screenshot-2021-10-08-at-13-39-49-Screenshot.png)
+__El cual da como resultado [este árbol sintáctico](https://laughing-ardinghelli-16d744.netlify.app/)__
 
 ## Modulo 6 - Tabla de símbolos
 
@@ -139,6 +139,7 @@ int main(){
 ```
 
 generará esta tabla de símbolos:
+
 ![tabla](https://i.ibb.co/n8ztCnT/Screenshot-2.png)
 
 Este análisis se logra mediante el corrido del arbol sintáctico y la utilizacion de estructuras "map" o diccionarios
